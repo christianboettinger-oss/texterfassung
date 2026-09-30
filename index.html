@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Texterfassung – Erfassung</title>
+<style>
+  :root{
+    --navy:#1F4E79; --navy-soft:#EDF1F6;
+    --ink:#1c1f23; --muted:#5c6672; --line:#dde3ea; --bg:#fff; --panel:#f7f9fb;
+    --gruen:#1B5E20; --gruen-bg:#E8F5E9;
+    --gelb:#8A6100; --gelb-bg:#FFF8E1;
+    --rot:#B3261E;  --rot-bg:#FDECEA;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --navy:#7FB2E5; --navy-soft:#1b2733;
+      --ink:#e8ebef; --muted:#9aa5b1; --line:#2c353f; --bg:#12161a; --panel:#181d23;
+      --gruen:#8BD18F; --gruen-bg:#16301a;
+      --gelb:#E8C46A; --gelb-bg:#2f2712;
+      --rot:#F0938C;  --rot-bg:#331816;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:860px;margin:0 auto;padding:36px 24px 130px}
+  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);font-weight:700;margin:0 0 6px}
+  h1{font-size:28px;margin:0 0 8px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:14px;margin:0}
+  .rule{height:3px;background:var(--navy);border-radius:2px;margin:20px 0 8px}
+
+  h2{font-size:17px;margin:38px 0 4px;color:var(--navy)}
+  h2 .n{opacity:.55;margin-right:7px;font-variant-numeric:tabular-nums}
+  h2 .tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    padding:2px 8px;border-radius:999px;margin-left:8px;vertical-align:2px}
+  .tag.pflicht{background:var(--navy-soft);color:var(--navy)}
+  .tag.optional{background:var(--panel);color:var(--muted);border:1px solid var(--line)}
+  .lede{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+
+  label{display:block;font-weight:600;font-size:13.5px;margin:14px 0 5px}
+  .hint{font-weight:400;color:var(--muted);font-size:12.5px}
+  input[type=text],textarea,select{
+    width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:7px;
+    background:var(--panel);color:var(--ink);font:inherit;font-size:14px;resize:vertical}
+  textarea{min-height:74px}
+  textarea.gross{min-height:260px}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--navy);outline-offset:-1px;background:var(--bg)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:620px){.grid2,.grid3{grid-template-columns:1fr}}
+  .check{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;margin:14px 0 0}
+  .check input{width:17px;height:17px;margin:0}
+
+  .cnt{font-size:12px;font-variant-numeric:tabular-nums;margin-top:3px;color:var(--muted)}
+  .cnt.ok{color:var(--gruen);font-weight:600}
+  .cnt.warn{color:var(--gelb);font-weight:600}
+  .cnt.bad{color:var(--rot);font-weight:600}
+
+  .merk{border-left:3px solid var(--navy);background:var(--navy-soft);border-radius:0 8px 8px 0;
+    padding:11px 14px;font-size:13px;margin:10px 0 0}
+  .merk b{color:var(--navy)}
+  .warnbox{border-left:3px solid var(--rot);background:var(--rot-bg);border-radius:0 8px 8px 0;
+    padding:11px 14px;font-size:13.5px;margin:10px 0 0}
+  .warnbox b{color:var(--rot)}
+  .gelbbox{border-left:3px solid var(--gelb);background:var(--gelb-bg);border-radius:0 8px 8px 0;
+    padding:11px 14px;font-size:13.5px;margin:10px 0 0}
+  .gelbbox b{color:var(--gelb)}
+  .okbox{border-left:3px solid var(--gruen);background:var(--gruen-bg);border-radius:0 8px 8px 0;
+    padding:11px 14px;font-size:13.5px;margin:10px 0 0}
+  .okbox b{color:var(--gruen)}
+
+  /* Bilder und Dateien */
+  .drop{border:2px dashed var(--line);border-radius:12px;padding:20px;text-align:center;
+    background:var(--panel);transition:.15s;margin-top:4px}
+  .drop.over{border-color:var(--navy);background:var(--navy-soft)}
+  .drop b{display:block;font-size:15px;margin-bottom:4px}
+  .drop .oder{color:var(--muted);font-size:13px;margin:8px 0 10px}
+  .drop input[type=file]{font:inherit;font-size:13px;max-width:100%}
+  .drop.klein{padding:14px}
+  .drop.klein b{font-size:14px}
+  .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:14px}
+  .card{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--panel)}
+  .card img{width:100%;height:104px;object-fit:contain;background:#fff;display:block}
+  .card .meta{padding:7px 8px}
+  .card .nr{font-size:11.5px;font-weight:700;color:var(--navy)}
+  .card .fn{font-size:11px;color:var(--muted);margin:3px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .card .px{font-size:11px;margin:2px 0 0;font-variant-numeric:tabular-nums;color:var(--muted)}
+  .card .rm{float:right;border:none;background:none;color:var(--rot);cursor:pointer;font-size:12px;padding:0;font-weight:600}
+  .datei{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px}
+  .datei .rm{border:none;background:none;color:var(--rot);cursor:pointer;font-size:12px;font-weight:600}
+
+  .status{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:16px 18px;margin-top:34px}
+  .status h3{margin:0 0 10px;font-size:14px;color:var(--navy)}
+  .status ul{list-style:none;margin:0;padding:0}
+  .status li{font-size:13.5px;padding:4px 0 4px 24px;position:relative}
+  .status li::before{position:absolute;left:0;top:4px;font-weight:700;font-size:13px}
+  .status li.ok::before{content:"●";color:var(--gruen)}
+  .status li.miss::before{content:"○";color:var(--rot)}
+  .status li.opt::before{content:"○";color:var(--muted)}
+  .status li.stopp::before{content:"■";color:var(--rot)}
+
+  .bar{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);
+    padding:12px 24px;display:flex;align-items:center;gap:14px;justify-content:center;flex-wrap:wrap}
+  button.go{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:11px 22px;
+    font:inherit;font-weight:700;font-size:15px;cursor:pointer}
+  @media (prefers-color-scheme: dark){ button.go{color:#12161a} }
+  button.go:disabled{opacity:.4;cursor:not-allowed}
+  button.sek{background:none;border:1px solid var(--navy);color:var(--navy);border-radius:8px;
+    padding:10px 18px;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+  .barnote{font-size:12.5px;color:var(--muted)}
+  .foot{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+  code{background:var(--panel);padding:1px 5px;border-radius:4px;font-size:12.5px}
+
+  /* Ergebnis */
+  table.erg{width:100%;border-collapse:collapse;margin:8px 0 22px;font-size:13.5px}
+  table.erg th{text-align:left;background:var(--navy);color:#fff;padding:8px 10px;font-size:12.5px}
+  @media (prefers-color-scheme: dark){ table.erg th{color:#12161a} }
+  table.erg td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.erg tr:last-child td{border-bottom:none}
+  .naechster{border:2px solid var(--navy);border-radius:12px;background:var(--navy-soft);
+    padding:22px 26px;margin:34px 0 8px}
+  .naechster h2{font-size:19px;margin:0 0 10px;color:var(--navy)}
+  .naechster p{font-size:14.5px;margin:0 0 14px}
+  ol.schritte{counter-reset:sc;list-style:none;margin:0 0 16px;padding:0}
+  ol.schritte li{counter-increment:sc;position:relative;padding:10px 0 10px 42px;font-size:14.5px;
+    border-bottom:1px solid var(--line)}
+  ol.schritte li:last-child{border-bottom:none}
+  ol.schritte li::before{content:counter(sc);position:absolute;left:0;top:9px;width:27px;height:27px;
+    border-radius:50%;background:var(--navy);color:#fff;font-size:13.5px;font-weight:700;
+    display:flex;align-items:center;justify-content:center}
+  @media (prefers-color-scheme: dark){ ol.schritte li::before{color:#12161a} }
+</style>
+</head>
+<body>
+<div class="wrap" id="viewErfassung">
+
+  <p class="eyebrow">AMZMANAGER · Verkaufstexte aus der Kundenwebsite</p>
+  <h1>Texterfassung</h1>
+  <p class="sub">Für Kunden ohne Amazon-Listing. Diese Datei muss im <b>Browser</b> geöffnet sein (Doppelklick), nicht in einer Vorschau. Es wird nichts hochgeladen – alles bleibt auf diesem Rechner. Ziel: unter 10 Minuten.</p>
+  <div class="rule"></div>
+
+  <!-- ================= Block 1 ================= -->
+  <h2><span class="n">1</span>Produkt<span class="tag pflicht">Pflicht</span></h2>
+  <p class="lede">Die Produktart steuert, welche Prüfmodule laufen. Die Maske prüft zusätzlich selbst, ob der Website-Text zu einer anderen Produktart passt.</p>
+
+  <div class="grid2">
+    <div><label>Marke<input type="text" id="marke"></label></div>
+    <div><label>Produktname <span class="hint">– Kurzname, nicht den Amazon-Titel</span><input type="text" id="produkt" placeholder="z. B. Filzkorb XL"></label><div class="cnt" id="c_produkt"></div></div>
+  </div>
+  <div class="grid2">
+    <div><label>Produktart
+      <select id="produktart">
+        <option value="allgemein">Allgemein</option>
+        <option value="nem">Lebensmittel / Nahrungsergänzung</option>
+        <option value="kosmetik">Kosmetik – Modul noch nicht hinterlegt</option>
+        <option value="medizin">Medizinprodukt – Modul noch nicht hinterlegt</option>
+        <option value="spielzeug">Spielzeug – Modul noch nicht hinterlegt</option>
+        <option value="elektro">Elektro – Modul noch nicht hinterlegt</option>
+        <option value="textil">Textil – Modul noch nicht hinterlegt</option>
+        <option value="lmkontakt">Lebensmittelkontakt – Modul noch nicht hinterlegt</option>
+      </select></label></div>
+    <div><label>Geplante Amazon-Kategorie <span class="hint">(optional)</span><input type="text" id="kategorie" placeholder="z. B. Garten › Kaminzubehör"></label></div>
+  </div>
+  <div id="modulHinweis"></div>
+
+  <div class="grid3">
+    <div><label>Parent oder Child
+      <select id="parentchild">
+        <option value="">– bitte wählen –</option>
+        <option value="einzel">Einzelprodukt, keine Varianten</option>
+        <option value="parent">Parent (Variantenfamilie)</option>
+        <option value="child">Child (eine Variante)</option>
+      </select></label></div>
+    <div><label>Variantenachse
+      <select id="achse">
+        <option value="">keine</option>
+        <option value="menge">Menge</option>
+        <option value="farbe">Farbe</option>
+        <option value="groesse">Größe</option>
+        <option value="mehrere">mehrere</option>
+      </select></label></div>
+    <div><label>Preislage <span class="hint">(optional)</span><input type="text" id="preis" placeholder="z. B. 25–30 €"></label></div>
+  </div>
+  <label>Ausprägungen der Varianten <span class="hint">(optional) – z. B. „3 kg, 5 kg, 7 kg“ oder „Grau, Anthrazit“</span>
+    <input type="text" id="auspraegungen"></label>
+
+  <!-- ================= Block 2 Amazon ================= -->
+  <h2><span class="n">2</span>Besteht bereits Amazon-Content?<span class="tag pflicht">Pflicht</span></h2>
+  <p class="lede">Entscheidet die Hauptquelle. Mit Amazon-Content ist die Website nur Ergänzung.</p>
+  <div class="grid2">
+    <label class="check"><input type="radio" name="amz" id="amzJa" value="ja"> Ja – Amazon-Listing existiert</label>
+    <label class="check"><input type="radio" name="amz" id="amzNein" value="nein"> Nein – nur Website oder Shop</label>
+  </div>
+
+  <div id="amzBlock" hidden>
+    <div class="merk"><b>Feld für Feld kopieren,</b> so wie es aktuell online steht – nicht schon verbessert. Bullet Points einfach alle zusammen einfügen, einer je Zeile.</div>
+    <div class="grid2">
+      <div><label>ASIN <span class="hint">(optional)</span><input type="text" id="amz_asin" placeholder="B0…"></label></div>
+      <div></div>
+    </div>
+    <label>Titel<input type="text" id="amz_titel"></label>
+    <div class="cnt" id="c_amz_titel"></div>
+    <label>Artikel-Highlights <span class="hint">– das 125-Zeichen-Feld unter dem Titel, bei Alt-Listings meist leer</span><input type="text" id="amz_hl"></label>
+    <label>Bullet Points <span class="hint">– alle fünf, einer je Zeile</span><textarea id="amz_bullets" style="min-height:130px"></textarea></label>
+    <div class="cnt" id="c_amz_bullets"></div>
+    <label>Produktbeschreibung <span class="hint">(optional)</span><textarea id="amz_beschreibung" style="min-height:100px"></textarea></label>
+    <label>A+ Content – Text <span class="hint">(optional)</span><textarea id="amz_aplus" style="min-height:80px"></textarea></label>
+  </div>
+
+  <!-- ================= Block 3 Website ================= -->
+  <h2><span class="n">3</span>Text der Kundenwebsite<span class="tag pflicht" id="webTag">Pflicht</span></h2>
+  <p class="lede" id="webLede">Die Hauptquelle. Technische Daten, Lieferumfang, Zutaten und Dosierung zieht der Skill selbst aus diesem Text.</p>
+
+  <div class="merk">
+    <b>Einmal kopieren, einmal einfügen.</b> Produktseite der Kundenwebsite öffnen, <code>Strg+A</code>, <code>Strg+C</code> – hier <code>Strg+V</code>. Menü, Fußzeile und Warenkorb dürfen mit hinein, das Aufräumen passiert im Skill.
+    <br><b>Datenblatt oder Reiter „Technische Daten“?</b> Einfach darunter mit einfügen.
+  </div>
+
+  <label>Adresse der Produktseite <span class="hint">– Claude ruft die Seite zusätzlich ab. Klappt das beim Shop nicht, zählt der eingefügte Text.</span><input type="text" id="url" placeholder="https://…"></label>
+  <label>Kompletter Seitentext der Produktseite<textarea id="webtext" class="gross" placeholder="Hier den kompletten kopierten Seiteninhalt einfügen …"></textarea></label>
+  <div class="cnt" id="c_webtext">noch nichts eingefügt</div>
+
+  <!-- ================= Block 2b (nur NEM) ================= -->
+  <div id="block4" hidden>
+    <h2><span class="n">3b</span>Lebensmittel und Nahrungsergänzung<span class="tag optional">nur was nicht im Website-Text steht</span></h2>
+    <p class="lede">Ohne Mengen je Tagesdosis (mg, µg) ist keine gesundheitsbezogene Angabe freigabefähig – harter Stopp. Stehen die Mengen schon im Website- oder Amazon-Text, bleibt dieser Block leer.</p>
+
+    <label>Nährwerttabelle je Tagesdosis mit NRV <span class="hint">– z. B. vom Etikett abgetippt, eine Zeile je Stoff</span>
+      <textarea id="naehrwerte" style="min-height:110px" placeholder="Zink 10 mg · 100 % NRV"></textarea></label>
+    <div class="cnt" id="c_naehrwerte"></div>
+
+    <label>Zutatenliste<textarea id="zutaten" style="min-height:60px"></textarea></label>
+    <div class="grid2">
+      <div><label>Empfohlene Tagesdosis <span class="hint">– die kleinste empfohlene</span><input type="text" id="tagesdosis" placeholder="z. B. 1 Kapsel täglich"></label></div>
+      <div><label>Darreichungsform
+        <select id="darreichung">
+          <option value="">– aus dem Text ableiten –</option>
+          <option value="kapsel_gelatine">Kapsel, Hülle aus Gelatine</option>
+          <option value="kapsel_pflanzlich">Kapsel, pflanzliche Hülle (z. B. HPMC)</option>
+          <option value="tablette">Tablette</option>
+          <option value="pulver">Pulver</option>
+          <option value="fluessig">Flüssig</option>
+          <option value="sonstige">Sonstige</option>
+        </select></label></div>
+    </div>
+    <div id="huellenHinweis"></div>
+    <div class="grid2">
+      <div><label>Allergene<input type="text" id="allergene"></label></div>
+      <div><label>Koffeingehalt je Tagesdosis<input type="text" id="koffein"></label></div>
+    </div>
+    <label>Zertifizierungen <span class="hint">(z. B. Kölner Liste mit Chargennummer)</span><input type="text" id="zert_nem"></label>
+  </div>
+
+  <!-- ================= Block 3 ================= -->
+  <h2><span class="n">4</span>Hinweise und Nachweise<span class="tag optional">optional</span></h2>
+  <p class="lede">Entscheidet, welche Aussagen aus Website und Listing übernommen werden dürfen. Was hier nicht belegt ist, wird bei belegpflichtigen Aussagen (TÜV, FSC, Testurteil, Patent) zum Platzhalter.</p>
+  <textarea id="hinweise" style="min-height:110px" placeholder="Nachweise: FSC-Lizenz FSC-C123456 · Prüfbericht TÜV Süd Nr. …&#10;Nicht behaupten: …&#10;Abgemahnt: …&#10;Besondere Vorgaben: Normen, Warnhinweise, Altersangaben …"></textarea>
+
+  <!-- ================= Block 4 ================= -->
+  <h2><span class="n">5</span>Zielgruppe und Positionierung<span class="tag optional">optional, empfohlen</span></h2>
+  <p class="lede">Trägt Einstieg, Bullet 2 (Alltagsproblem), Bullet 3 (USP), die Zielgruppenführung der Beschreibung und die Kommunikation zum Kunden. Leere Felder leitet der Skill aus den Texten ab.</p>
+  <div class="grid2">
+    <div><label>Primäre Zielgruppe<textarea id="zg1" placeholder="Wer kauft es, wofür?"></textarea></label></div>
+    <div><label>Sekundäre Zielgruppe<textarea id="zg2"></textarea></label></div>
+  </div>
+  <div class="grid2">
+    <div><label>Alltagsproblem, das das Produkt löst<textarea id="problem"></textarea></label></div>
+    <div><label>USP – was es von vergleichbaren unterscheidet<textarea id="usp"></textarea></label></div>
+  </div>
+  <div class="grid2">
+    <div><label>Häufigste Kundenfrage <span class="hint">– als Frage, keine Rezensionszusammenfassung</span><textarea id="frage" placeholder="z. B. Passen 33-cm-Scheite hinein?"></textarea></label></div>
+    <div><label>Kaufanlass <span class="hint">(z. B. Umzug, Heizsaison, Geschenk)</span><textarea id="anlass"></textarea></label></div>
+  </div>
+
+  <label>Rezensionen <span class="hint">(optional) – Rezensionsseite auf Amazon, im Shop oder bei Trusted Shops öffnen, <code>Strg+A</code>, <code>Strg+C</code>, hier <code>Strg+V</code></span>
+    <textarea id="rezensionen" style="min-height:110px" placeholder="Kompletten Seitentext der Rezensionen einfügen …"></textarea></label>
+  <div class="cnt" id="c_rezensionen"></div>
+  <div class="merk"><b>Wofür:</b> Die Wörter Ihrer Käufer sind die beste Vorlage fürs Storytelling. Der Skill nimmt daraus Alltagsszenen, Kaufargumente und häufige Einwände – Zahlen und Eigenschaften nur, wenn eine andere Quelle sie bestätigt.</div>
+
+  <!-- ================= Block 5 ================= -->
+  <h2><span class="n">6</span>Lieferumfang<span class="tag optional">optional</span></h2>
+  <p class="lede">Nur nötig bei Sets oder wenn die Texte unklar sind. Sonst leitet der Skill den Lieferumfang ab – Unklares wird Platzhalter und offene Frage, nichts wird ergänzt.</p>
+  <textarea id="lieferumfang" style="min-height:70px" placeholder="1 × Kaminholzkorb&#10;1 × Anleitung"></textarea>
+  <div class="cnt" id="c_liefer"></div>
+
+  <!-- ================= Block 6 ================= -->
+  <h2><span class="n">7</span>Markt<span class="tag optional">optional</span></h2>
+  <p class="lede">Zwei Minuten Aufwand für den größten Qualitätssprung im SEO-Teil.</p>
+
+  <div id="marktWarn" class="warnbox">
+    <b>Ohne Suchergebnisseite kein Keyword-Abgleich.</b> Titel und Backend beruhen dann nur auf dem Website-Text. Das Kundendokument weist das aus, und es wird keine Relevanz einzelner Begriffe behauptet.
+  </div>
+
+  <label>Zielsuchbegriff <span class="hint">– der eine Begriff, unter dem das Produkt gefunden werden soll</span><input type="text" id="zielbegriff"></label>
+
+  <div class="merk">
+    <b>Suchergebnisseite als Text:</b> Suchbegriff auf Amazon eingeben, ein paar Mal scrollen, <code>Strg+A</code>, <code>Strg+C</code> – hier <code>Strg+V</code>.
+  </div>
+  <label>Seiteninhalt der Suchergebnisseite<textarea id="serp" style="min-height:120px" placeholder="Hier den kompletten kopierten Seiteninhalt einfügen …"></textarea></label>
+  <div class="cnt" id="c_serp">noch nichts eingefügt</div>
+
+  <label>Keyword-Export <span class="hint">(CSV, z. B. aus Helium 10 oder dem Suchbegriffsbericht)</span></label>
+  <div class="drop klein" id="dropCsv">
+    <b>CSV hierher ziehen</b>
+    <p class="oder">– oder Datei auswählen –</p>
+    <input type="file" id="fileCsv" accept=".csv,.txt,text/csv">
+  </div>
+  <div id="csvInfo"></div>
+
+  <label style="margin-top:22px">Wettbewerber <span class="hint">(optional, bis zu drei) – Titel und Bullet Points eines Bestsellers einfügen</span></label>
+  <div class="merk"><b>Wofür:</b> Begriffe für SEO und Themen, die Käufer erwarten. Übernommen wird keine Formulierung und kein Merkmal, das Ihr Produkt nicht nachweislich hat. Fehlt uns ein Wert, den die Wettbewerber nennen, wird daraus eine offene Frage an den Kunden.</div>
+  <div class="grid3">
+    <div><label>Wettbewerber 1<textarea id="wb1" style="min-height:120px" placeholder="Titel&#10;Bullet 1&#10;Bullet 2 …"></textarea></label></div>
+    <div><label>Wettbewerber 2<textarea id="wb2" style="min-height:120px"></textarea></label></div>
+    <div><label>Wettbewerber 3<textarea id="wb3" style="min-height:120px"></textarea></label></div>
+  </div>
+
+  <!-- ================= Block 7 ================= -->
+  <h2><span class="n">8</span>Bestehende Bilder<span class="tag optional">optional</span></h2>
+  <p class="lede">Bis zu 12 Bilder von Website, Shop oder Verpackung. Keine Rollen nötig, die Bilder werden durchnummeriert. Mit Bildern prüft der Skill Widersprüche zwischen Bild und Text und liest Etiketten mit – ohne Bilder steht diese Grenze im Kundendokument.</p>
+
+  <div class="merk">
+    <b>Bilder von Websites lassen sich oft nicht direkt herüberziehen.</b> Dann: <b>Rechtsklick → „Bild speichern unter“</b> und hier auswählen, oder <b>Windows-Taste + Umschalt + S</b> und hier <code>Strg+V</code>.
+  </div>
+
+  <div class="drop" id="drop">
+    <b>Produktbilder hierher ziehen oder mit Strg+V einfügen</b>
+    <p class="oder">– oder Dateien auswählen –</p>
+    <input type="file" id="file" accept="image/*" multiple>
+  </div>
+  <div class="cnt" id="c_bilder">0 von 12 Bildern</div>
+  <div class="gal" id="gal"></div>
+
+  <label style="margin-top:22px">Screenshot der Suchergebnisseite <span class="hint">(optional, zusätzlich zu den 12 Bildern – zeigt, wie das Umfeld aussieht)</span></label>
+  <div class="drop klein" id="dropSerp">
+    <b>Screenshot hierher ziehen</b>
+    <p class="oder">– oder Datei auswählen –</p>
+    <input type="file" id="fileSerp" accept="image/*">
+  </div>
+  <div class="gal" id="galSerp"></div>
+
+  <!-- ================= Status ================= -->
+  <div class="status">
+    <h3>Vollständigkeit</h3>
+    <ul id="stat"></ul>
+  </div>
+
+  <p class="foot">Erzeugt <code>Texterfassung_&lt;Marke&gt;_&lt;Produkt&gt;.zip</code> mit allen Angaben als <code>daten.json</code>, den Bildern und dem Keyword-Export. Diese eine Datei an Claude übergeben.</p>
+</div>
+
+
+<div class="wrap" id="viewErgebnis" hidden>
+  <p class="eyebrow">AMZMANAGER · Verkaufstexte aus der Kundenwebsite</p>
+  <h1>Paket erzeugt</h1>
+  <p class="sub" id="ergKopf"></p>
+  <div class="rule"></div>
+
+  <div id="ergWarn"></div>
+
+  <h2><span class="n">1</span>Was die Maske schon gefunden hat</h2>
+  <p class="lede">Gezählt, nicht beurteilt. Die Bewertung dieser Stellen folgt in der Kurzbewertung des Kundendokuments.</p>
+  <div id="ergFunde"></div>
+
+  <div class="naechster">
+    <h2 style="margin-top:0">So entstehen die Verkaufstexte</h2>
+    <ol class="schritte">
+      <li><b>Paket herunterladen.</b> Ist beim Erzeugen automatisch passiert, liegt normalerweise im Ordner <i>Downloads</i>. Über den Knopf unten jederzeit erneut möglich.</li>
+      <li><b>Claude öffnen</b> und die ZIP-Datei in den Chat ziehen.</li>
+      <li><b>Dazuschreiben:</b> <i>„Hier ist das Texterfassungspaket, bitte die Verkaufstexte erstellen.“</i></li>
+      <li><b>Ergebnis:</b> Word-Dokument mit Kurzbewertung des Website-Texts, zwei Titelvarianten mit Empfehlung, Artikel-Highlights, fünf Bullet Points, Beschreibung in Reintext und HTML, Backend-Suchbegriffen, offenen Fragen und Prüfprotokoll.</li>
+    </ol>
+  </div>
+  <p class="foot">Diese Seite wurde von der Maske berechnet und ersetzt die Prüfung im Skill nicht.</p>
+</div>
+
+<div class="bar" id="barErgebnis" hidden>
+  <button class="go" id="dlPaket">Paket erneut herunterladen</button>
+  <button class="sek" id="zurueck">Zurück zur Erfassung</button>
+</div>
+
+<div class="bar" id="barErfassung">
+  <button class="go" id="go" disabled>Paket erzeugen</button>
+  <span class="barnote" id="note">Marke, Produktname und Website-Text werden mindestens benötigt.</span>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const v = id => ($(id).value || "").trim();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const zeilen = s => (s || "").split("\n").map(z => z.trim()).filter(Boolean);
+const amzJa = () => $("amzJa").checked;
+const amzText = () => amzJa() ? [v("amz_titel"), v("amz_hl"), v("amz_bullets"), v("amz_beschreibung"), v("amz_aplus")].join("\n") : "";
+const quellText = () => [v("webtext"), amzText()].join("\n");
+
+/* ================= Produktarten ================= */
+const ARTEN = {
+  allgemein: { name: "Allgemein",                        hinterlegt: true },
+  nem:       { name: "Lebensmittel / Nahrungsergänzung", hinterlegt: true },
+  kosmetik:  { name: "Kosmetik",                         hinterlegt: false },
+  medizin:   { name: "Medizinprodukt",                   hinterlegt: false },
+  spielzeug: { name: "Spielzeug",                        hinterlegt: false },
+  elektro:   { name: "Elektro",                          hinterlegt: false },
+  textil:    { name: "Textil",                           hinterlegt: false },
+  lmkontakt: { name: "Lebensmittelkontakt",              hinterlegt: false },
+};
+/* Signalwörter – ein Modul gilt als erkannt, wenn mindestens zwei verschiedene Signale vorkommen */
+const SIGNALE = {
+  nem:       [/nahrungserg[äa]nzung/, /tagesdosis/, /verzehrempfehlung/, /\bnrv\b/, /n[äa]hrstoffbezugs/,
+              /vitamin [a-z]\d*/, /\b(zink|magnesium|selen|eisen|jod|chrom|folsäure|biotin)\b/,
+              /\d\s*(mg|µg|mcg)\b/, /\bkapseln?\b/, /\bpresslinge?\b/],
+  kosmetik:  [/\bcreme\b/, /\bserum\b/, /\blotion\b/, /\bshampoo\b/, /\binci\b/, /gesichtspflege/,
+              /hautpflege/, /\bkosmetik/, /dermatologisch/],
+  medizin:   [/medizinprodukt/, /\bmdr\b/, /ce\s?0\d{3}/, /zur behandlung/, /linderung/, /\bdiagnos/],
+  spielzeug: [/spielzeug/, /ab \d+ jahren/, /\ben[ -]?71\b/, /kinder ab/, /nicht für kinder unter/, /kleinteile/],
+  elektro:   [/\bakku/, /\bbatterie/, /\d\s?v\b/, /\d\s?w\b/, /\bvolt\b/, /\bwatt\b/, /netzteil/, /ladeger[äa]t/, /\busb/, /\bweee\b/],
+  textil:    [/baumwolle/, /polyester/, /\belasthan/, /\bviskose/, /\bgots\b/, /oeko-?tex/, /faserzusammensetzung/],
+  lmkontakt: [/lebensmittelecht/, /\blfgb\b/, /lebensmittelkontakt/, /bpa-?frei/, /sp[üu]lmaschinen/],
+};
+function erkenneModule() {
+  const text = [quellText(), v("produkt"), v("naehrwerte"), v("zutaten")].join("\n").toLowerCase();
+  const treffer = {};
+  for (const [art, liste] of Object.entries(SIGNALE)) {
+    const n = liste.filter(re => re.test(text)).length;
+    if (n >= 2) treffer[art] = n;
+  }
+  return treffer;
+}
+function modulAnzeige() {
+  const gewaehlt = v("produktart");
+  const erkannt = erkenneModule();
+  const fremd = Object.keys(erkannt).filter(a => a !== gewaehlt);
+  let html = "";
+  if (!ARTEN[gewaehlt].hinterlegt) {
+    html += `<div class="gelbbox"><b>Für „${ARTEN[gewaehlt].name}“ ist noch kein Fachmodul hinterlegt.</b> Geprüft wird nach den allgemeinen Amazon- und Wettbewerbsregeln. Das Kundendokument weist darauf hin. Bekannte Vorgaben bitte unten unter „Hinweise und Nachweise“ eintragen.</div>`;
+  }
+  if (fremd.length) {
+    html += `<div class="warnbox"><b>Der Produkttext passt auch zu: ${fremd.map(a => ARTEN[a].name).join(", ")}.</b> ` +
+      (fremd.includes("nem") && gewaehlt !== "nem"
+        ? "Bei Lebensmitteln und Nahrungsergänzung gelten strenge Regeln für gesundheitsbezogene Angaben – bitte die Produktart prüfen. "
+        : "") +
+      "Der Skill lässt die passenden Module zusätzlich laufen.</div>";
+  }
+  $("modulHinweis").innerHTML = html;
+  $("block4").hidden = !(gewaehlt === "nem");
+  if (gewaehlt === "nem") naehrwertAnzeige();
+  pruefe();
+}
+$("produktart").addEventListener("change", modulAnzeige);
+
+/* ================= Amazon-Schalter ================= */
+function amzAnzeige() {
+  const ja = amzJa(), gewaehlt = ja || $("amzNein").checked;
+  $("amzBlock").hidden = !ja;
+  $("webTag").textContent = ja ? "optional, Ergänzung" : "Pflicht";
+  $("webTag").className = "tag " + (ja ? "optional" : "pflicht");
+  $("webLede").textContent = ja
+    ? "Ergänzt das Amazon-Listing, z. B. um Maße, Material oder Datenblatt. Widersprüche zwischen Website und Listing werden als offene Frage geführt."
+    : "Die Hauptquelle. Technische Daten, Lieferumfang, Zutaten und Dosierung zieht der Skill selbst aus diesem Text.";
+  modulAnzeige();
+}
+["amzJa","amzNein"].forEach(id => $(id).addEventListener("change", amzAnzeige));
+$("amz_titel").addEventListener("input", () => {
+  const n = v("amz_titel").length, c = $("c_amz_titel");
+  c.textContent = n ? n + " Zeichen" + (n > 75 ? " · Alt-Format über 75 – wird neu aufgeteilt" : "") : "";
+  c.className = "cnt " + (n > 75 ? "warn" : n ? "ok" : "");
+  modulAnzeige();
+});
+$("amz_bullets").addEventListener("input", () => {
+  const n = zeilen(v("amz_bullets")).length, c = $("c_amz_bullets");
+  c.textContent = n ? n + " Bullet Points erkannt" : "";
+  c.className = "cnt " + (n >= 3 ? "ok" : n ? "warn" : "");
+  modulAnzeige();
+});
+["amz_hl","amz_beschreibung","amz_aplus","amz_asin"].forEach(id => $(id).addEventListener("input", modulAnzeige));
+$("produkt").addEventListener("input", () => {
+  const n = v("produkt").length, c = $("c_produkt");
+  c.textContent = n > 60 ? n + " Zeichen – bitte nur den Kurznamen, der Titel entsteht im Skill" : "";
+  c.className = "cnt " + (n > 60 ? "bad" : "");
+});
+
+/* ================= Zähler ================= */
+function webtextZaehler() {
+  const t = v("webtext"), c = $("c_webtext");
+  if (!t) { c.textContent = "noch nichts eingefügt"; c.className = "cnt"; }
+  else {
+    const n = t.length;
+    c.textContent = n.toLocaleString("de-DE") + " Zeichen" + (n < 600 ? " · sehr wenig – ist wirklich die ganze Produktseite dabei?" : "");
+    c.className = "cnt " + (n < 600 ? "warn" : "ok");
+  }
+  modulAnzeige();
+}
+$("webtext").addEventListener("input", webtextZaehler);
+$("zutaten").addEventListener("input", modulAnzeige);
+
+const MENGE = /(\d+(?:[.,]\d+)?)\s*(mg|µg|mcg|g)\b/gi;
+function naehrwertAnzeige() {
+  const c = $("c_naehrwerte");
+  const mb = (v("naehrwerte").match(MENGE) || []).length, mw = (quellText().match(MENGE) || []).length;
+  if (mb) { c.textContent = mb + " Mengenangaben in diesem Feld erkannt"; c.className = "cnt ok"; }
+  else if (mw) { c.textContent = mw + " Mengenangaben im Website- oder Amazon-Text erkannt – dieser Block kann leer bleiben"; c.className = "cnt ok"; }
+  else { c.textContent = "Weder hier noch im Website- oder Amazon-Text Mengen (mg, µg, g) erkannt – harter Stopp für gesundheitsbezogene Angaben"; c.className = "cnt bad"; }
+}
+function naehrwertZaehler() { modulAnzeige(); }
+$("naehrwerte").addEventListener("input", naehrwertZaehler);
+
+$("darreichung").addEventListener("change", () => {
+  const d = v("darreichung");
+  $("huellenHinweis").innerHTML =
+    d === "kapsel_gelatine" ? `<div class="gelbbox"><b>Gelatinehülle:</b> Wird im Listing sachlich als Material genannt – in Bullet 4, in den technischen Daten und in der Zutatenliste. Falls bekannt, bitte die Herkunft ergänzen (z. B. Rindergelatine).</div>`
+  : "";
+  pruefe();
+});
+
+const RAUSCH = /^(gesponsert|sponsored|amazon'?s choice|bestseller|gratis|kostenlose|lieferung|prime|jetzt|nur noch|weitere|optionen|ergebnisse|mehr kaufoptionen|zum hauptinhalt|alle kategorien)/i;
+function titelRaten(text) {
+  return (text || "").split("\n").map(z => z.trim())
+    .filter(z => z.length >= 30 && z.length <= 260 && z.includes(" ")
+      && !RAUSCH.test(z) && !/^[\d.,€%\s]+$/.test(z) && (z.match(/[A-Za-zÄÖÜäöüß]/g) || []).length > 20);
+}
+$("serp").addEventListener("input", () => {
+  const t = v("serp"), c = $("c_serp");
+  if (!t) { c.textContent = "noch nichts eingefügt"; c.className = "cnt"; }
+  else {
+    const n = titelRaten(t).length;
+    c.textContent = "ca. " + n + " Titel erkannt · " + t.length.toLocaleString("de-DE") + " Zeichen Seitentext";
+    c.className = "cnt " + (n >= 15 ? "ok" : n >= 5 ? "warn" : "bad");
+  }
+  pruefe();
+});
+
+$("rezensionen").addEventListener("input", () => {
+  const n = v("rezensionen").length, c = $("c_rezensionen");
+  c.textContent = n ? n.toLocaleString("de-DE") + " Zeichen Rezensionstext" : "";
+  c.className = "cnt " + (n ? "ok" : "");
+  pruefe();
+});
+
+$("lieferumfang").addEventListener("input", () => {
+  const n = zeilen(v("lieferumfang")).length;
+  $("c_liefer").textContent = n ? n + (n === 1 ? " Position" : " Positionen") : "";
+  $("c_liefer").className = "cnt " + (n ? "ok" : "");
+  pruefe();
+});
+
+/* ================= Keyword-Export ================= */
+let csv = null;
+function nimmCsv(f) {
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = e => { csv = { name: f.name, text: e.target.result }; zeigeCsv(); };
+  r.readAsText(f);
+}
+function zeigeCsv() {
+  if (!csv) { $("csvInfo").innerHTML = ""; return pruefe(); }
+  const n = zeilen(csv.text).length;
+  $("csvInfo").innerHTML = `<div class="datei"><span class="cnt ok">${esc(csv.name)} · ${n} Zeilen</span><button class="rm" id="csvWeg">entfernen</button></div>`;
+  $("csvWeg").addEventListener("click", () => { csv = null; zeigeCsv(); });
+  pruefe();
+}
+$("fileCsv").addEventListener("change", e => { nimmCsv(e.target.files[0]); e.target.value = ""; });
+dropZone($("dropCsv"), fs => nimmCsv([...fs].find(f => /\.(csv|txt)$/i.test(f.name) || f.type.includes("csv"))));
+
+/* ================= Bilder ================= */
+const MAX_BILDER = 12;
+let bilder = [], serpBild = null, lfd = 0;
+
+function dropZone(el, fn) {
+  ["dragenter","dragover"].forEach(ev => el.addEventListener(ev, e => { e.preventDefault(); el.classList.add("over"); }));
+  ["dragleave","drop"].forEach(ev => el.addEventListener(ev, e => { e.preventDefault(); el.classList.remove("over"); }));
+  el.addEventListener("drop", e => { e.preventDefault(); fn(e.dataTransfer.files); });
+}
+function ladeBild(f) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onload = ev => {
+      const img = new Image();
+      img.onload = () => res({ file: f, name: f.name && f.name !== "image.png" ? f.name : "einfuegen_" + (++lfd) + ".png",
+                               w: img.width, h: img.height, url: ev.target.result });
+      img.onerror = () => res(null);
+      img.src = ev.target.result;
+    };
+    r.readAsDataURL(f);
+  });
+}
+async function nimm(list) {
+  const neu = [...list].filter(f => f.type.startsWith("image/"));
+  let ueber = false;
+  for (const f of neu) {
+    if (bilder.length >= MAX_BILDER) { ueber = true; break; }
+    const b = await ladeBild(f);
+    if (b) bilder.push(b);
+  }
+  zeichne();
+  if (ueber) alarmBilder();
+}
+function alarmBilder() {
+  $("c_bilder").textContent = "Höchstens 12 Bilder – weitere wurden nicht übernommen";
+  $("c_bilder").className = "cnt bad";
+}
+$("file").addEventListener("change", e => { nimm(e.target.files); e.target.value = ""; });
+dropZone($("drop"), nimm);
+window.addEventListener("paste", e => {
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  const dateien = [...items].filter(i => i.kind === "file" && i.type.startsWith("image/")).map(i => i.getAsFile()).filter(Boolean);
+  if (dateien.length) { e.preventDefault(); nimm(dateien); }
+});
+
+function karte(b, i, rmAttr, beschriftung) {
+  return `<div class="card"><img src="${b.url}" alt="">
+    <div class="meta"><span class="nr">${beschriftung}</span><button class="rm" ${rmAttr}="${i}">entfernen</button>
+    <p class="px">${b.w} × ${b.h} px</p><p class="fn">${esc(b.name)}</p></div></div>`;
+}
+function zeichne() {
+  $("gal").innerHTML = bilder.map((b, i) => karte(b, i, "data-rm", "Bild " + String(i + 1).padStart(2, "0"))).join("");
+  $("gal").querySelectorAll("[data-rm]").forEach(btn =>
+    btn.addEventListener("click", e => { bilder.splice(+e.target.dataset.rm, 1); zeichne(); }));
+  if (bilder.length <= MAX_BILDER) {
+    $("c_bilder").textContent = bilder.length + " von 12 Bildern";
+    $("c_bilder").className = "cnt " + (bilder.length ? "ok" : "");
+  }
+  pruefe();
+}
+
+async function nimmSerp(list) {
+  const f = [...list].find(f => f.type.startsWith("image/"));
+  if (!f) return;
+  serpBild = await ladeBild(f);
+  zeichneSerp();
+}
+function zeichneSerp() {
+  $("galSerp").innerHTML = serpBild ? karte(serpBild, 0, "data-rms", "Suchergebnis") : "";
+  const btn = $("galSerp").querySelector("[data-rms]");
+  if (btn) btn.addEventListener("click", () => { serpBild = null; zeichneSerp(); });
+  pruefe();
+}
+$("fileSerp").addEventListener("change", e => { nimmSerp(e.target.files); e.target.value = ""; });
+dropZone($("dropSerp"), nimmSerp);
+
+/* ================= Vorprüfung des Website-Texts ================= */
+const PRUEFLISTEN = [
+  { gruppe: "Superlativ oder Alleinstellung", begriffe: ["beste", "bester", "bestes", "besten", "perfekt", "einzigartig", "revolutionär",
+      "nr. 1", "nr.1", "nummer 1", "führend", "marktführer", "erfolgreichste", "unschlagbar", "premium", "bestseller", "top-qualität", "weltweit erste"] },
+  { gruppe: "Von Amazon untersagte Behauptung", begriffe: ["umweltfreundlich", "umweltschonend", "ökologisch verträglich", "antibakteriell",
+      "antimikrobiell", "aus bambus", "enthält bambus", "aus soja", "enthält soja"] },
+  { gruppe: "Garantie oder Rückgabe", begriffe: ["geld-zurück", "geld zurück", "volle rückerstattung", "vollständige rückerstattung",
+      "uneingeschränkte garantie", "lebenslange garantie", "bei nichtgefallen", "zufriedenheitsgarantie"] },
+  { gruppe: "Preis oder Versand", begriffe: ["versandkostenfrei", "kostenloser versand", "gratis", "rabatt", "günstig", "preiswert", "billig"] },
+  { gruppe: "Zertifikat oder Test – Nachweis nötig", begriffe: ["fsc", "patentiert", "patent", "tüv", "geprüft", "zertifiziert", "testsieger",
+      "stiftung warentest", "öko-test", "dermatologisch getestet", "klinisch"] },
+];
+const PRUEF_NEM = { gruppe: "Lebensmittel: Krankheits-, Arznei- oder Wirkversprechen", begriffe: ["wirkstoff", "anabol", "hormon",
+    "testosteron", "hgh", "prostata", "blutzucker", "schilddrüse", "muskelkater", "immunsystem stärkt", "heilt", "heilung", "lindert",
+    "sofort", "nach 20 minuten", "entgiftet", "detox", "ohne doping", "fatburner"] };
+
+function vorpruefung() {
+  const quellen = {
+    "Website": v("webtext"),
+    "Amazon-Listing": amzText(),
+    "Zielgruppe, USP, Kundenfrage": [v("zg1"), v("zg2"), v("problem"), v("usp"), v("frage"), v("anlass")].join("\n"),
+  };
+  const listen = PRUEFLISTEN.slice();
+  if (v("produktart") === "nem" || erkenneModule().nem) listen.push(PRUEF_NEM);
+  const funde = [];
+  for (const [quelle, roh] of Object.entries(quellen)) {
+    const text = (roh || "").toLowerCase();
+    if (!text.trim()) continue;
+    for (const l of listen) {
+      const t = l.begriffe.filter(b => {
+        const re = new RegExp("(^|[^a-zäöüß])" + b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![a-zäöüß])", "i");
+        return re.test(text);
+      });
+      if (t.length) funde.push({ quelle, gruppe: l.gruppe, begriffe: t });
+    }
+  }
+  return funde;
+}
+
+/* ================= Vollständigkeit ================= */
+function nemStopp() {
+  return v("produktart") === "nem" && !(v("naehrwerte").match(MENGE) || []).length && !(quellText().match(MENGE) || []).length;
+}
+function pruefe() {
+  const nem = v("produktart") === "nem";
+  const markt = titelRaten(v("serp")).length >= 5;
+  const web = v("webtext").length >= 200 || /^https?:\/\//i.test(v("url"));
+  const amz = amzJa() && (!!v("amz_titel") || zeilen(v("amz_bullets")).length > 0);
+  const quelle = amzJa() ? amz : web;
+  const punkte = [
+    ["Marke",                                 !!v("marke"),                 "pflicht"],
+    ["Produktname",                           !!v("produkt"),               "pflicht"],
+    ["Parent oder Child",                     !!v("parentchild"),           "pflicht"],
+    ["Amazon-Content: ja oder nein",          $("amzJa").checked || $("amzNein").checked, "pflicht"],
+    ...(amzJa() ? [["Amazon-Titel oder Bullet Points", amz, "pflicht"], ["Website-Text oder Link (Ergänzung)", web, "optional"]]
+                : [["Website-Text oder Link", web, "pflicht"]]),
+    ...(nem ? [["Mengen je Tagesdosis (Text oder Block 2b)", !nemStopp(), "stopp"]] : []),
+    ["Hinweise und Nachweise",                !!v("hinweise"),              "optional"],
+    ["Primäre Zielgruppe",                    !!v("zg1"),                   "optional"],
+    ["USP",                                   !!v("usp"),                   "optional"],
+    ["Häufigste Kundenfrage",                 !!v("frage"),                 "optional"],
+    ["Rezensionen",                           !!v("rezensionen"),           "optional"],
+    ["Zielsuchbegriff",                       !!v("zielbegriff"),           "optional"],
+    ["Suchergebnisseite als Text",            markt,                        "optional"],
+    ["Keyword-Export",                        !!csv,                        "optional"],
+    ["Wettbewerber",                          !!(v("wb1") || v("wb2") || v("wb3")), "optional"],
+    ["Bilder",                                bilder.length > 0,            "optional"],
+  ];
+  $("stat").innerHTML = punkte.map(([t, ok, art]) =>
+    `<li class="${ok ? "ok" : art === "stopp" ? "stopp" : art === "pflicht" ? "miss" : "opt"}">${t}` +
+    (ok ? "" : art === "stopp" ? " – fehlt: harter Stopp für alle gesundheitsbezogenen Angaben"
+             : art === "pflicht" ? " – fehlt" : " – optional") + "</li>").join("");
+
+  $("marktWarn").hidden = markt;
+
+  const bereit = !!v("marke") && !!v("produkt") && ($("amzJa").checked || $("amzNein").checked) && quelle;
+  $("go").disabled = !bereit;
+  const offen = punkte.filter(p => p[2] === "pflicht" && !p[1]).length;
+  $("note").textContent = !bereit
+    ? "Mindestens nötig: Marke, Produktname, Auswahl Amazon-Content und die passende Hauptquelle."
+    : nemStopp() ? "Ohne Mengen je Tagesdosis werden keine gesundheitsbezogenen Angaben geschrieben – Paket geht trotzdem."
+    : offen ? offen + (offen > 1 ? " Pflichtangaben fehlen" : " Pflichtangabe fehlt") + " – Paket geht trotzdem."
+    : "Alles Wesentliche erfasst.";
+}
+["marke","produkt","auspraegungen","preis","kategorie","url","hinweise",
+ "zutaten","tagesdosis","allergene","koffein","zert_nem","zielbegriff","zg1","zg2","problem","usp","frage","anlass","wb1","wb2","wb3"]
+  .forEach(id => $(id).addEventListener("input", pruefe));
+["parentchild","achse"].forEach(id => $(id).addEventListener("change", pruefe));
+
+/* ================= ZIP (Store, ohne Abhängigkeit) ================= */
+const CRCT = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) { let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0; }
+  return t;
+})();
+const crc32 = buf => {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < buf.length; i++) c = CRCT[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+};
+function zip(dateien) {
+  const enc = new TextEncoder(), teile = [], zentral = [];
+  let off = 0;
+  const d = new Date();
+  const zt = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF;
+  const zd = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+  dateien.forEach(({ name, data }) => {
+    const nb = enc.encode(name), crc = crc32(data), len = data.length;
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+    lh.setUint16(8, 0, true); lh.setUint16(10, zt, true); lh.setUint16(12, zd, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, len, true); lh.setUint32(22, len, true);
+    lh.setUint16(26, nb.length, true); lh.setUint16(28, 0, true);
+    teile.push(new Uint8Array(lh.buffer), nb, data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true);
+    ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true); ch.setUint16(12, zt, true);
+    ch.setUint16(14, zd, true); ch.setUint32(16, crc, true); ch.setUint32(20, len, true);
+    ch.setUint32(24, len, true); ch.setUint16(28, nb.length, true); ch.setUint16(30, 0, true);
+    ch.setUint16(32, 0, true); ch.setUint16(34, 0, true); ch.setUint16(36, 0, true);
+    ch.setUint32(38, 0, true); ch.setUint32(42, off, true);
+    zentral.push(new Uint8Array(ch.buffer), nb);
+    off += 30 + nb.length + len;
+  });
+  const zStart = off;
+  let zLen = 0; zentral.forEach(t => zLen += t.length);
+  const eo = new DataView(new ArrayBuffer(22));
+  eo.setUint32(0, 0x06054b50, true); eo.setUint16(8, dateien.length, true);
+  eo.setUint16(10, dateien.length, true); eo.setUint32(12, zLen, true);
+  eo.setUint32(16, zStart, true); eo.setUint16(20, 0, true);
+  return new Blob([...teile, ...zentral, new Uint8Array(eo.buffer)], { type: "application/zip" });
+}
+const lesen = f => new Promise(res => {
+  const r = new FileReader();
+  r.onload = e => res(new Uint8Array(e.target.result));
+  r.readAsArrayBuffer(f);
+});
+const dateiname = s => (s || "").normalize("NFKD").replace(/ß/g, "ss").replace(/[̀-ͯ]/g, "")
+  .replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "ohne-Angabe";
+const endung = n => ((n.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "") || "png");
+
+/* ================= Ansicht und Download ================= */
+let LETZTES_PAKET = null, LETZTER_NAME = "";
+function speichern(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+$("dlPaket").addEventListener("click", () => { if (LETZTES_PAKET) speichern(LETZTES_PAKET, LETZTER_NAME); });
+$("zurueck").addEventListener("click", () => {
+  $("viewErgebnis").hidden = true; $("barErgebnis").hidden = true;
+  $("viewErfassung").hidden = false; $("barErfassung").hidden = false;
+  window.scrollTo(0, 0);
+});
+
+function zeigeErgebnis(daten) {
+  $("ergKopf").textContent = [daten.produkt.marke, daten.produkt.name, daten.produkt.produktart_name, "Hauptquelle: " + (daten.hauptquelle === "amazon" ? "Amazon-Listing" : "Website"), daten.erfasst_am].filter(Boolean).join("  ·  ");
+  const w = [];
+  if (daten.lebensmittel && daten.lebensmittel.harter_stopp)
+    w.push(`<div class="warnbox"><b>Harter Stopp Lebensmittel:</b> Keine Mengen je Tagesdosis erfasst. Der Skill schreibt keine gesundheitsbezogenen Angaben und führt die fehlenden Werte als offene Frage.</div>`);
+  if (!daten.markt.begriffsabgleich_moeglich)
+    w.push(`<div class="warnbox"><b>Kein Begriffsabgleich:</b> Die Suchergebnisseite fehlt. Titel und Backend beruhen nur auf dem Website-Text.</div>`);
+  if (daten.produkt.module_erkannt.filter(a => a !== daten.produkt.produktart).length)
+    w.push(`<div class="gelbbox"><b>Zusätzliche Prüfmodule erkannt:</b> ${daten.produkt.module_erkannt.filter(a => a !== daten.produkt.produktart).map(a => ARTEN[a].name).join(", ")}.</div>`);
+  if (!daten.produkt.fachmodul_hinterlegt)
+    w.push(`<div class="gelbbox"><b>Kein Fachmodul für ${esc(daten.produkt.produktart_name)}:</b> Es wird nach allgemeinen Regeln geprüft, das Dokument weist darauf hin.</div>`);
+  if (!w.length) w.push(`<div class="okbox"><b>Erfassung vollständig.</b> Alle Pflichtangaben liegen vor.</div>`);
+  $("ergWarn").innerHTML = w.join("");
+
+  const f = daten.vorpruefung.kritische_formulierungen;
+  $("ergFunde").innerHTML = f.length
+    ? `<table class="erg"><tr><th style="width:170px">Quelle</th><th style="width:240px">Art</th><th>Gefunden</th></tr>` +
+      f.map(x => `<tr><td>${esc(x.quelle)}</td><td><b>${esc(x.gruppe)}</b></td><td>${x.begriffe.map(esc).join(", ")}</td></tr>`).join("") + `</table>`
+    : `<div class="okbox"><b>Keine auffälligen Formulierungen gefunden.</b> Geprüft wurden Superlative, untersagte Behauptungen, Garantie-, Preis- und Versandaussagen sowie Zertifikate und Tests.</div>`;
+
+  $("viewErfassung").hidden = true; $("barErfassung").hidden = true;
+  $("viewErgebnis").hidden = false; $("barErgebnis").hidden = false;
+  window.scrollTo(0, 0);
+}
+
+/* ================= Paket ================= */
+$("go").addEventListener("click", async () => {
+  const btn = $("go");
+  btn.disabled = true; btn.textContent = "wird erzeugt …";
+
+  const dateien = [], manifest = [];
+  for (let i = 0; i < bilder.length; i++) {
+    const b = bilder[i];
+    const name = "bilder/" + String(i + 1).padStart(2, "0") + "_bild." + endung(b.name);
+    manifest.push({ datei: name, original: b.name, breite: b.w, hoehe: b.h });
+    dateien.push({ name, data: await lesen(b.file) });
+  }
+  let serpDatei = null;
+  if (serpBild) {
+    serpDatei = "bilder/00_suchergebnis." + endung(serpBild.name);
+    dateien.push({ name: serpDatei, data: await lesen(serpBild.file) });
+  }
+  if (csv) dateien.push({ name: "keyword_export/" + csv.name, data: new TextEncoder().encode(csv.text) });
+
+  const art = v("produktart");
+  const erkannt = Object.keys(erkenneModule());
+  const nem = art === "nem";
+  const daten = {
+    schema: "texterfassung-1",
+    erfasst_am: new Date().toISOString().slice(0, 10),
+    produkt: {
+      marke: v("marke"), name: v("produkt"),
+      produktart: art, produktart_name: ARTEN[art].name, fachmodul_hinterlegt: ARTEN[art].hinterlegt,
+      module_erkannt: erkannt,
+      parent_child: v("parentchild"), variantenachse: v("achse"), auspraegungen: v("auspraegungen"),
+      preislage: v("preis"), geplante_kategorie: v("kategorie"),
+    },
+    hauptquelle: amzJa() ? "amazon" : "website",
+    amazon_content: amzJa() ? {
+      vorhanden: true, asin: v("amz_asin"),
+      titel: v("amz_titel"), titel_zeichen: v("amz_titel").length,
+      artikel_highlights: v("amz_hl"),
+      bullet_points: zeilen(v("amz_bullets")),
+      beschreibung: v("amz_beschreibung"), aplus_text: v("amz_aplus"),
+      hinweis: "Bestehender Amazon-Content ist Faktenquelle, aber keine Vorlage: Regelverstoesse und unbelegte Aussagen werden nicht uebernommen. artikel_highlights ist das 125-Zeichen-Feld unter dem Titel, bullet_points sind die Aufzaehlungspunkte.",
+    } : { vorhanden: false },
+    website: {
+      url: v("url"), produkttext: v("webtext"),
+      hinweis: "url zusaetzlich abrufen; scheitert der Abruf, zaehlt nur produkttext. Technische Daten, Lieferumfang, Zutaten und Dosierung aus den Texten ableiten. Widersprueche zwischen Website und Amazon-Content als offene Frage fuehren.",
+    },
+    hinweise_und_nachweise: v("hinweise"),
+    lebensmittel: nem ? {
+      naehrwerte_je_tagesdosis: v("naehrwerte"),
+      mengen_erkannt: (v("naehrwerte").match(MENGE) || []).concat(quellText().match(MENGE) || []),
+      harter_stopp: nemStopp(),
+      zutaten: v("zutaten"), tagesdosis: v("tagesdosis"), darreichung: v("darreichung"),
+      allergene: v("allergene"), koffein: v("koffein"), zertifizierungen: v("zert_nem"),
+    } : null,
+    markt: {
+      zielsuchbegriff: v("zielbegriff"),
+      serp_rohtext: v("serp"),
+      titel_erkannt_vorschlag: titelRaten(v("serp")),
+      begriffsabgleich_moeglich: titelRaten(v("serp")).length >= 5,
+      keyword_export: csv ? "keyword_export/" + csv.name : null,
+      wettbewerber: ["wb1","wb2","wb3"].map((id, i) => ({ nr: i + 1, titel_und_bullets: v(id) })).filter(w => w.titel_und_bullets),
+      wettbewerber_hinweis: "Nur Begriffsquelle und Themenliste. Keine Formulierung uebernehmen, kein Merkmal, das das eigene Produkt nicht nachweislich hat. Themen der Wettbewerber ohne eigenen Beleg werden offene Fragen.",
+    },
+    positionierung: {
+      zielgruppe_primaer: v("zg1"), zielgruppe_sekundaer: v("zg2"), alltagsproblem: v("problem"),
+      usp: v("usp"), haeufigste_kundenfrage: v("frage"), kaufanlass: v("anlass"),
+      rezensionen_rohtext: v("rezensionen"),
+      rezensionen_hinweis: "Quelle fuer Szenen, Kaeuferwoerter und Einwaende (Storytelling). Zahlen und Eigenschaften daraus nur mit Bestaetigung aus einer anderen Quelle.",
+    },
+    lieferumfang: zeilen(v("lieferumfang")),
+    lieferumfang_quelle: zeilen(v("lieferumfang")).length ? "maske" : "aus website-text ableiten",
+    bilder: manifest,
+    suchergebnis_screenshot: serpDatei,
+    vorpruefung: { kritische_formulierungen: vorpruefung() },
+    hinweis: "Faktenquellen sind ausschliesslich amazon_content, website, hinweise_und_nachweise, lebensmittel, positionierung, lieferumfang und die Bilder. " +
+             "titel_erkannt_vorschlag ist nur eine grobe Vorfilterung, massgeblich ist serp_rohtext.",
+  };
+
+  dateien.unshift({ name: "daten.json", data: new TextEncoder().encode(JSON.stringify(daten, null, 2)) });
+  LETZTES_PAKET = zip(dateien);
+  LETZTER_NAME = "Texterfassung_" + dateiname(v("marke")) + "_" + dateiname(v("produkt")) + ".zip";
+  speichern(LETZTES_PAKET, LETZTER_NAME);
+
+  zeigeErgebnis(daten);
+  btn.textContent = "Paket erzeugen"; btn.disabled = false;
+});
+
+modulAnzeige();
+pruefe();
+</script>
+</body>
+</html>
